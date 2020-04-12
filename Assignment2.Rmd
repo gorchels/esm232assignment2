@@ -1,0 +1,43 @@
+---
+title: "Untitled"
+author: "Madeline Gorchels"
+date: "4/12/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+##Installing Packages
+
+```{r}
+library(tidyverse)
+```
+
+## Background information for Almonds 
+```{r}
+prod_life = 22 #Productive life (22-25 years)
+first_harv = 3 #First harvest (age in years)
+full_prod = 6 #Full production (age in years)
+area_change = 69 #Area change 1980–2003 (%)
+yield_change = 57 #Yield change 1980–2003 (%)
+avg_yield = 0.9 #Average yields 2000–2003 (ton acre"1)
+```
+
+## Parameters for yield anomoly
+```{r}
+#Tmf is the mimimum temperature in the month two months before harvest (Ferbuary)
+#Pm is the total Precipitation in the month before harvest (March)
+
+march_mm = 12
+min_T_Feb = 8
+```
+
+## Read in data 
+
+```{r}
+climate = read_csv("climate.csv")
+
+```
+
