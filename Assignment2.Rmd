@@ -41,3 +41,25 @@ climate = read_csv("climate.csv")
 
 ```
 
+##Wrangle dataset to work as model input 
+
+```{r}
+climate_sum = climate %>% 
+  group_by(year,month) %>% 
+  summarise(min_T = min(tmin_c),
+            precip = sum(precip)) %>% 
+  filter(month== 3 | month==2)
+
+climate_temp = climate_sum %>% 
+  filter(month==2)
+
+climate_precip = climate_sum %>% 
+  filter(month==3)
+
+climate_join = right_join(climate_precip,climate_temp, by="year")
+
+climate_input = climate_join %>% 
+  select(year, precip.x, min_T.y)
+#This is my model input. The precip.x is the precipitation in march and the min_T.y minimum temperature in February
+```
+
