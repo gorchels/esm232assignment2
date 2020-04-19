@@ -1,5 +1,5 @@
 ---
-title: "Untitled"
+title: "Homework 2"
 author: "Madeline Gorchels"
 date: "4/12/2020"
 output: html_document
@@ -15,31 +15,15 @@ knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 ```
 
-## Background information for Almonds 
-```{r}
-prod_life = 22 #Productive life (22-25 years)
-first_harv = 3 #First harvest (age in years)
-full_prod = 6 #Full production (age in years)
-area_change = 69 #Area change 1980–2003 (%)
-yield_change = 57 #Yield change 1980–2003 (%)
-avg_yield = 0.9 #Average yields 2000–2003 (ton acre"1)
-```
-
-## Parameters for yield anomoly
-```{r}
-#Tmf is the mimimum temperature in the month two months before harvest (Ferbuary)
-#Pm is the total Precipitation in the month before harvest (March)
-
-march_mm = 12
-min_T_Feb = 8
-```
-
 ## Read in data 
 
 ```{r}
 climate = read_csv("climate.csv")
 
 ```
+
+
+## 3) Using my function to create a graph of the provided climate data from 1989-2010
 
 ##Wrangle dataset to work as model input 
 
@@ -63,24 +47,15 @@ climate_input = climate_join %>%
 #This is my model input. The precip.x is the precipitation in march and the min_T.y minimum temperature in February
 ```
 
-## Writing in the function because I'm having an issue with source 
-```{r}
-#Tn = Minimum temperature in month two months prior to harvest (February) Celsuis 
-#P1 = Precipitation in month before harvest (March) mm
-
-yield_anomaly=function(Tmf,Pm) {
-  result= -0.015*Tmf - 0.0046*(Tmf^2) + 0.0043*(Pm^2) + 0.28
-  return(result)
-}
-
-```
-
-
-##Creating the model output 
-
+## Sourcing my function
 ```{r}
 
 source("../R/yield_anomaly.R")
+
+```
+
+## Running my function
+```{r}
 climate_output = climate_input
 
 climate_output$yield = mapply(FUN=yield_anomaly, Tmf=climate_input$min_T.y,Pm=climate_input$precip.x)
@@ -97,13 +72,13 @@ ggplot(climate_output) +
   ylab("% Yield Anomoly")
 ```
 
+## 4) Running the same analysis but using a 2 degrees warmer scenario
 ```{r}
 climate_change = climate_input %>% 
   mutate(temp_cc = min_T.y+2)
 ```
 
 ```{r}
-
 climate_change$yield = mapply(FUN=yield_anomaly, Tmf=climate_change$temp_cc,Pm=climate_change$precip.x)
 ```
 
@@ -119,7 +94,7 @@ ggplot(climate_change) +
 ```
 
 
-##Sensativity Analysis: Varying the first slope parameter (s1)
+## 5) Varying the first slope parameter (s1)
 
 ```{r}
 
@@ -137,4 +112,31 @@ sens_climate$box_cc=sens_climate$yield_cc-sens_climate$yield_sens_cc
 sens_climate$box=sens_climate$yield-sens_climate$yield_sens
 
 ```
+
+
+##Creating boxplots dataframes
+
+```{r}
+box_plot = sens_climate %>% 
+  select(box) %>% 
+  mutate(condition="1989-2010")
+
+box_plot_cc = sens_climate %>% 
+  select(box) %>% 
+  mutate(condition="2°C warming 1989-2010")
+
+box_plot_all = rbind(box_plot, box_plot_cc)
+```
+
+
+##Creating boxplots
+
+```{r}
+ggplot(box_plot_all, aes(x=condition,y=box))+
+  geom_boxplot()+
+  theme_classic()+
+  xlab("")+
+  ylab("Difference in Yield Anomoly")
+```
+
 
