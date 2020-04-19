@@ -63,3 +63,78 @@ climate_input = climate_join %>%
 #This is my model input. The precip.x is the precipitation in march and the min_T.y minimum temperature in February
 ```
 
+## Writing in the function because I'm having an issue with source 
+```{r}
+#Tn = Minimum temperature in month two months prior to harvest (February) Celsuis 
+#P1 = Precipitation in month before harvest (March) mm
+
+yield_anomaly=function(Tmf,Pm) {
+  result= -0.015*Tmf - 0.0046*(Tmf^2) + 0.0043*(Pm^2) + 0.28
+  return(result)
+}
+
+```
+
+
+##Creating the model output 
+
+```{r}
+
+source("../R/yield_anomaly.R")
+climate_output = climate_input
+
+climate_output$yield = mapply(FUN=yield_anomaly, Tmf=climate_input$min_T.y,Pm=climate_input$precip.x)
+```
+
+##Graphing
+
+```{r}
+ggplot(climate_output) +
+  geom_line(aes(x=year, y=yield))+
+  geom_point(aes(x=year, y=yield))+
+  theme_classic()+
+  xlab("Year")+
+  ylab("% Yield Anomoly")
+```
+
+```{r}
+climate_change = climate_input %>% 
+  mutate(temp_cc = min_T.y+2)
+```
+
+```{r}
+
+climate_change$yield = mapply(FUN=yield_anomaly, Tmf=climate_change$temp_cc,Pm=climate_change$precip.x)
+```
+
+##Graphing
+
+```{r}
+ggplot(climate_change) +
+  geom_line(aes(x=year, y=yield))+
+  geom_point(aes(x=year, y=yield))+
+  theme_classic()+
+  xlab("Year")+
+  ylab("% Yield Anomoly")
+```
+
+
+##Sensativity Analysis: Varying the first slope parameter (s1)
+
+```{r}
+
+sens_climate = climate_change %>% 
+  mutate(s1=rnorm(mean=-0.015, sd=0.0015, n=1)) 
+
+sens_climate$yield_sens=mapply(FUN=yield_anomaly, Tmf=sens_climate$min_T.y,Pm=sens_climate$precip.x, s1=sens_climate$s1)
+
+sens_climate$yield_sens_cc=mapply(FUN=yield_anomaly, Tmf=sens_climate$temp_cc,Pm=sens_climate$precip.x, s1=sens_climate$s1)
+
+sens_climate$yield=climate_output$yield
+
+sens_climate$box_cc=sens_climate$yield_cc-sens_climate$yield_sens_cc
+
+sens_climate$box=sens_climate$yield-sens_climate$yield_sens
+
+```
+

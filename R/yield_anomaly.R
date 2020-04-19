@@ -5,7 +5,13 @@
 #Tn = Minimum temperature in month two months prior to harvest (February) Celsuis 
 #P1 = Precipitation in month before harvest (March) mm
 
-yield_anom=function(Tmf,Pm) {
-  result= -0.015*Tmf - 0.0046*(Tmf^2) + 0.0043*(Pm^2) + 0.28
+yield_anomaly=function(Tmf,Pm, s1=-0.015,s2=0.0046,s3=0.0043,int=0.28) {
+ 
+  #error checking
+  Pm= ifelse(Pm < 0, return("Precipitation values are less than 0"), Pm) 
+  Tmf = ifelse(Tmf > 30, return("Temperature values high, did you use maximum temperature?"), Tmf)
+
+  #function equation
+   result= s1*Tmf - s2*(Tmf^2) + s3*(Pm^2) + int
   return(result)
 }
